@@ -830,6 +830,13 @@ class Jenkins
         return $this->execute(sprintf('/computer/%s/config.xml', $computerName), [\CURLOPT_RETURNTRANSFER => 1,]);
     }
 
+    /**
+     * @param string $job
+     * @param string $buildId
+     * @param string $path
+     *
+     * @return string
+     */
     public function getArtifact($job, $buildId, $path)
     {
         return $this->execute(sprintf('/job/%s/%s/artifact%s', $job, $buildId, $path), [\CURLOPT_RETURNTRANSFER => 1,]);
