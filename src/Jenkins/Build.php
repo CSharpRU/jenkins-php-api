@@ -249,4 +249,9 @@ class Build
     {
         return $this->build->builtOn;
     }
+
+    public function getArtifacts()
+    {
+        return $this->build->artifacts;
+    }
 }

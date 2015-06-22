@@ -2,6 +2,9 @@
 
 namespace JenkinsKhan;
 
+use JenkinsKhan\Jenkins\Build;
+use JenkinsKhan\Jenkins\Job;
+
 class Jenkins
 {
 
@@ -175,11 +178,11 @@ class Jenkins
     {
         $this->initialize();
 
-        $jobs = array();
+        $jobs = [];
         foreach ($this->jenkins->jobs as $job) {
-            $jobs[$job->name] = array(
+            $jobs[$job->name] = [
                 'name' => $job->name
-            );
+            ];
         }
 
         return $jobs;
@@ -192,7 +195,7 @@ class Jenkins
     {
         $this->initialize();
 
-        $jobs = array();
+        $jobs = [];
         foreach ($this->jenkins->jobs as $job) {
             $jobs[$job->name] = $this->getJob($job->name);
         }
@@ -210,7 +213,7 @@ class Jenkins
     {
         $this->initialize();
 
-        $executors = array();
+        $executors = [];
         for ($i = 0; $i < $this->jenkins->numExecutors; $i++) {
             $url  = sprintf('%s/computer/%s/executors/%s/api/json', $this->baseUrl, $computer, $i);
             $curl = curl_init($url);
@@ -242,7 +245,7 @@ class Jenkins
      * @return bool
      * @throws \RuntimeException
      */
-    public function launchJob($jobName, $parameters = array())
+    public function launchJob($jobName, $parameters = [])
     {
         if (0 === count($parameters)) {
             $url = sprintf('%s/job/%s/build', $this->baseUrl, $jobName);
@@ -255,7 +258,7 @@ class Jenkins
         curl_setopt($curl, \CURLOPT_POST, 1);
         curl_setopt($curl, \CURLOPT_POSTFIELDS, http_build_query($parameters));
 
-        $headers = array();
+        $headers = [];
 
         if ($this->areCrumbsEnabled()) {
             $headers[] = $this->getCrumbHeader();
@@ -317,7 +320,7 @@ class Jenkins
         curl_setopt($curl, \CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, \CURLOPT_POST, 1);
 
-        $headers = array();
+        $headers = [];
 
         if ($this->areCrumbsEnabled()) {
             $headers[] = $this->getCrumbHeader();
@@ -362,7 +365,7 @@ class Jenkins
     {
         $this->initialize();
 
-        $views = array();
+        $views = [];
         foreach ($this->jenkins->views as $view) {
             $views[] = $this->getView($view->name);
         }
@@ -558,7 +561,7 @@ class Jenkins
         curl_setopt($curl, \CURLOPT_POSTFIELDS, $xmlConfiguration);
         curl_setopt($curl, \CURLOPT_RETURNTRANSFER, 1);
 
-        $headers = array('Content-Type: text/xml');
+        $headers = ['Content-Type: text/xml'];
 
         if ($this->areCrumbsEnabled()) {
             $headers[] = $this->getCrumbHeader();
@@ -587,7 +590,7 @@ class Jenkins
         curl_setopt($curl, \CURLOPT_POST, 1);
         curl_setopt($curl, \CURLOPT_POSTFIELDS, $configuration);
 
-        $headers = array('Content-Type: text/xml');
+        $headers = ['Content-Type: text/xml'];
 
         if ($this->areCrumbsEnabled()) {
             $headers[] = $this->getCrumbHeader();
@@ -633,7 +636,7 @@ class Jenkins
         $curl = curl_init($url);
         curl_setopt($curl, \CURLOPT_POST, 1);
 
-        $headers = array();
+        $headers = [];
 
         if ($this->areCrumbsEnabled()) {
             $headers[] = $this->getCrumbHeader();
@@ -660,7 +663,7 @@ class Jenkins
         $curl = curl_init($url);
         curl_setopt($curl, \CURLOPT_POST, 1);
 
-        $headers = array();
+        $headers = [];
 
         if ($this->areCrumbsEnabled()) {
             $headers[] = $this->getCrumbHeader();
@@ -686,7 +689,7 @@ class Jenkins
         $curl = curl_init($url);
         curl_setopt($curl, \CURLOPT_POST, 1);
 
-        $headers = array();
+        $headers = [];
 
         if ($this->areCrumbsEnabled()) {
             $headers[] = $this->getCrumbHeader();
@@ -712,7 +715,7 @@ class Jenkins
         $curl = curl_init($url);
         curl_setopt($curl, \CURLOPT_POST, 1);
 
-        $headers = array();
+        $headers = [];
 
         if ($this->areCrumbsEnabled()) {
             $headers[] = $this->getCrumbHeader();
@@ -801,15 +804,15 @@ class Jenkins
     public function getComputers()
     {
         $return = $this->execute(
-            '/computer/api/json', array(
+            '/computer/api/json', [
                 \CURLOPT_RETURNTRANSFER => 1,
-            )
+            ]
         );
         $infos  = json_decode($return);
         if (!$infos instanceof \stdClass) {
             throw new \RuntimeException('Error during json_decode');
         }
-        $computers = array();
+        $computers = [];
         foreach ($infos->computer as $computer) {
             $computers[] = $this->getComputer($computer->displayName);
         }
@@ -824,6 +827,11 @@ class Jenkins
      */
     public function getComputerConfiguration($computerName)
     {
-        return $this->execute(sprintf('/computer/%s/config.xml', $computerName), array(\CURLOPT_RETURNTRANSFER => 1,));
+        return $this->execute(sprintf('/computer/%s/config.xml', $computerName), [\CURLOPT_RETURNTRANSFER => 1,]);
+    }
+
+    public function getArtifact($job, $buildId, $path)
+    {
+        return $this->execute(sprintf('/job/%s/%s/artifact%s', $job, $buildId, $path), [\CURLOPT_RETURNTRANSFER => 1,]);
     }
 }
